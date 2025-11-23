@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Sales (4662 docs – MOST CRITICAL)
+model Sale {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  date           String
+  rvNumber       String?
+  airlineCode    String
+  documentNumber String
+  iataName       String?
+  supplierName   String
+  accountType    String
+  sellPrice      Float
+  buyingPrice    Float
+  mode           String
+  remarks        String   @default("")
+  passengerName  String   @default("")
+  sector         String   @default("")
+  sellBy         String?
+  postStatus     String   @default("Pending")
+  paymentStatus  String   @default("Due")
+  saveAndPost    String?
+  createdAt      DateTime @default(now())
+  createdBy      String
+  officeId       String
+
+  @@index([officeId])
+  @@index([createdBy])
+  @@index([date])
+  @@index([paymentStatus])
+  @@index([postStatus])
+  @@index([supplierName])
+  @@map("sales")
+}
+
+// 2. Payments
+model Payment {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  paidAmount   Float
+  totalDue     Float
+  supplierName String
+  paymentDate  String
+  receipt      String?
+  createdAt    DateTime @default(now())
+  createdBy    String
+  officeId     String
+
+  @@index([officeId])
+  @@index([createdBy])
+  @@index([paymentDate])
+  @@map("payments")
+}
+
+// 3. Suppliers
+model Supplier {
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
+  supplierName    String
+  accountType     String
+  openingBalance  String  @default("00")
+  date            String
+  status          String  @default("Active")
+  totalDue        Float   @default(0)
+  sellBy          String?
+  createdBy       String
+  officeId        String
+
+  @@index([officeId])
+  @@index([createdBy])
+  @@index([supplierName])
+  @@map("suppliers")
+}
+
+// 4. Users
+model User {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String @unique
+  position  String?
+  role      String
+  officeId  String
+  password  String
+  date      String
+  status    String @default("active")
+
+  @@index([officeId])
+  @@index([role])
+  @@map("users")
+}
+
+
+// 5. Airlines
+model Airline {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  airlineName String
+  iataName    String
+  airlineCode String
+  status      String @default("Active")
+
+  @@index([airlineCode])
+  @@index([iataName])
+  @@map("airlines")
+}
+
+// 6. Client Areas (Offices)
+model ClientArea {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  officeName    String
+  officeId      String @unique
+  officeAddress String?
+  status        String @default("active")
+
+  @@map("clientAreas")
+}
