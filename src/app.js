@@ -50,7 +50,7 @@ app.use("/api", routes);
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Welcome to Sales API",
+    message: "Welcome to quickway2services API",
     version: "1.0.0",
     endpoints: {
       health: "/health",
