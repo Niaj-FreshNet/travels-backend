@@ -11,7 +11,7 @@ const router = Router();
 
 // Mount routes
 router.use("/auth", authRoutes);      // Auth routes (login, token)
-router.use("/users", userRoutes);     // User management routes
+router.use("/user", userRoutes);     // User management routes
 router.use("/sales", salesRoutes);    // Sales routes
 router.use("/payment", paymentRoutes);  // Payment routes
 router.use("/airlines", airlineRoutes)
