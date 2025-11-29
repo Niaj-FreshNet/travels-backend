@@ -87,6 +87,51 @@ class SalesController {
         }
     }
 
+    async getPaymentCounts(req, res) {
+        try {
+            const result = await salesServices.getPaymentCounts();
+            return res.status(200).json({ success: true, data: result });
+        } catch (error) {
+            console.error("Error fetching payment counts:", error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async getProfitSummary(req, res) {
+        try {
+            const result = await salesServices.calculateProfitSummary();
+
+            return res.status(200).json({
+                success: true,
+                data: result
+            });
+        } catch (error) {
+            console.error("Error in profit summary:", error);
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to calculate profit summary",
+                error: error.message
+            });
+        }
+    }
+
+    async getTotalDuePerUser(req, res) {
+        try {
+            const result = await salesServices.calculateTotalDuePerUser();
+            return res.status(200).json({
+                success: true,
+                data: result,
+            });
+        } catch (error) {
+            console.error("Error fetching total due per user:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
     // GET /api/sales/validate-existing - Validate document number & get next RV number
     async validateExistingSale(req, res) {
         try {

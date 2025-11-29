@@ -1,6 +1,7 @@
 import express from "express";
 import { salesController } from "./sales.controller.js";
 import verifyToken from "../../middleware/auth.middleware.js";
+import verifyAdmin from "../../middleware/admin.middleware.js";
 
 const router = express.Router();
 
@@ -20,6 +21,13 @@ router.get("/validate-existing", salesController.validateExistingSale);
 
 // GET /api/sales/payment-status - Get sales by supplier and payment status
 router.get("/payment-status", salesController.getSalesBySupplierPaymentStatus);
+
+router.get("/payment-status-count", salesController.getPaymentCounts);
+
+router.get("/profit-summary", salesController.getProfitSummary);
+
+// Get total due for all users
+router.get("/total-due", verifyAdmin, salesController.getTotalDuePerUser);
 
 // GET /api/sales/:id - Get single sale by ID
 router.get("/:id", salesController.getSaleById);

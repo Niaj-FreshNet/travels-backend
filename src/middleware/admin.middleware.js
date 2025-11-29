@@ -3,8 +3,8 @@ import prisma from "../config/db.js"; // ensure db.js uses ESM export
 const verifyAdmin = async (req, res, next) => {
   try {
     const { email, officeId, role } = req.user || req.decoded;
-
-    if (role !== "admin") {
+    
+    if (role !== "admin" && role !== "super-admin") {
       return res.status(403).json({
         success: false,
         message: "Forbidden access: NOT ADMIN",
@@ -27,7 +27,7 @@ const verifyAdmin = async (req, res, next) => {
       });
     }
 
-    if (user.role !== "admin" || user.officeId !== officeId) {
+    if (user.role === "admin" && user.officeId !== officeId) {
       return res.status(403).json({
         success: false,
         message: "Forbidden access: NOT ADMIN or Unauthorized Office",

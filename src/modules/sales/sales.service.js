@@ -103,6 +103,75 @@ class SalesServices {
         });
     }
 
+    async getPaymentCounts() {
+        const dueCount = await prisma.sale.count({
+            where: { paymentStatus: "Due" }
+        });
+
+        const paidCount = await prisma.sale.count({
+            where: { paymentStatus: "Paid" }
+        });
+
+        return {
+            duePayments: dueCount,
+            paidPayments: paidCount
+        };
+    }
+
+    async calculateProfitSummary() {
+        // PAID sales = total profit margin
+        const paidSales = await prisma.sale.findMany({
+            where: {
+                paymentStatus: "Paid"
+            },
+            select: { sellPrice: true, buyingPrice: true }
+        });
+
+        const totalProfit = paidSales.reduce(
+            (acc, sale) => acc + (sale.sellPrice - sale.buyingPrice),
+            0
+        );
+
+        // DUE sales = profit on air
+        const dueSales = await prisma.sale.findMany({
+            where: {
+                paymentStatus: "Due"
+            },
+            select: { sellPrice: true, buyingPrice: true }
+        });
+
+        const profitOnAir = dueSales.reduce(
+            (acc, sale) => acc + (sale.sellPrice - sale.buyingPrice),
+            0
+        );
+
+        return {
+            totalProfit,
+            profitOnAir
+        };
+    }
+
+    async calculateTotalDuePerUser() {
+        // Aggregate total due grouped by sellBy
+        const totalDueData = await prisma.sale.groupBy({
+            by: ["sellBy"],
+            _sum: {
+                buyingPrice: true,
+            },
+            where: {
+                paymentStatus: "Due",
+            },
+        });
+
+        // Map to a clean format
+        const result = totalDueData.map(item => ({
+            name: item.sellBy,
+            totalDue: item._sum.buyingPrice || 0,
+        }));
+
+        return result;
+    }
+
     // Validate document number and generate next RV number
     async validateDocumentAndGenerateRV(documentNumber) {
         // Check if document exists

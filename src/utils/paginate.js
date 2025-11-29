@@ -1,7 +1,7 @@
 const paginate = async (model, where = {}, options = {}) => {
   const {
     page = 1,
-    limit = 25,
+    limit = 20,
     sort = "-createdAt",
     search = "",
     searchFields = [],
