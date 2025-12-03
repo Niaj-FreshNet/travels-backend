@@ -4,38 +4,45 @@ import { ROLES, PAYMENT_METHODS } from "./payment.constant.js";
 
 class PaymentServices {
     // Get all payments (Admin sees office payments, Super-Admin sees all)
-    async getAllPayments({ user, query }) {
-        const { role, email, officeId } = user;
+async getAllPayments({ user, query }) {
+    const { role, officeId } = user;
 
-        let where = {};
+    let where = {};
 
-        // Admins see only their office payments
-        if (role === ROLES.ADMIN) {
-            where.officeId = officeId;
-        }
-        // Super-Admin sees all payments (no filter)
-        // Sales users are blocked at controller level
-
-        // Optional filters
-        if (query.method) {
-            where.method = query.method;
-        }
-
-        // Date filters
-        if (query.startDate || query.endDate) {
-            where.date = {};
-            if (query.startDate) where.date.gte = query.startDate;
-            if (query.endDate) where.date.lte = query.endDate;
-        }
-
-        return paginate(prisma.payment, where, {
-            page: query.page,
-            limit: query.limit || 25,
-            sort: query.sort || "-createdAt",
-            search: query.search,
-            searchFields: ["method", "createdBy", "officeId"],
-        });
+    // Admin = only their office
+    if (role === ROLES.ADMIN) {
+        where.officeId = officeId;
     }
+
+    // Optional method filter
+    if (query.method) {
+        where.method = query.method;
+    }
+
+    // Date range filter using paymentDate
+    if (query.startDate && query.endDate) {
+        where.paymentDate = {
+            gte: query.startDate,
+            lte: query.endDate
+        };
+    } else if (query.startDate) {
+        where.paymentDate = {
+            gte: query.startDate
+        };
+    } else if (query.endDate) {
+        where.paymentDate = {
+            lte: query.endDate
+        };
+    }
+
+    return paginate(prisma.payment, where, {
+        page: query.page,
+        limit: query.limit || 25,
+        sort: query.sort || "-createdAt",
+        search: query.search,
+        searchFields: ["method", "createdBy", "officeId"],
+    });
+}
 
     // Get single payment by ID
     async getPaymentById(id, user) {
@@ -59,7 +66,7 @@ class PaymentServices {
 
         const paymentData = {
             ...data,
-            amount: Number(data.amount) || 0,
+            paidAmount: Number(data.paidAmount) || 0,
             createdBy: user.email,
             officeId: user.officeId,
             createdAt: new Date(),
@@ -88,9 +95,9 @@ class PaymentServices {
         // Remove fields that shouldn't be updated
         const { createdBy, officeId: _office, createdAt, ...updateData } = data;
 
-        // Convert amount to number if present
-        if (updateData.amount !== undefined) {
-            updateData.amount = Number(updateData.amount);
+        // Convert paidAmount to number if present
+        if (updateData.paidAmount !== undefined) {
+            updateData.paidAmount = Number(updateData.paidAmount);
         }
 
         return prisma.payment.update({
@@ -120,15 +127,15 @@ class PaymentServices {
     // Helper: Validate payment data
     _validatePaymentData(data, isUpdate = false) {
         if (!isUpdate) {
-            if (!data.amount) throw new Error("Amount is required");
-            if (!data.date) throw new Error("Date is required");
+            if (!data.paidAmount) throw new Error("paidAmount is required");
+            if (!data.paymentDate) throw new Error("paymentDate is required");
         }
 
-        // Validate amount is a valid number
-        if (data.amount !== undefined) {
-            const amount = Number(data.amount);
-            if (isNaN(amount) || amount < 0) {
-                throw new Error("Invalid amount");
+        // Validate paidAmount is a valid number
+        if (data.paidAmount !== undefined) {
+            const paidAmount = Number(data.paidAmount);
+            if (isNaN(paidAmount) || paidAmount < 0) {
+                throw new Error("Invalid paidAmount");
             }
         }
 
@@ -153,22 +160,22 @@ class PaymentServices {
         }
 
         if (startDate || endDate) {
-            where.date = {};
-            if (startDate) where.date.gte = startDate;
-            if (endDate) where.date.lte = endDate;
+            where.paymentDate = {};
+            if (startDate) where.paymentDate.gte = startDate;
+            if (endDate) where.paymentDate.lte = endDate;
         }
 
         const [total, totalAmount] = await Promise.all([
             prisma.payment.count({ where }),
             prisma.payment.aggregate({
                 where,
-                _sum: { amount: true },
+                _sum: { paidAmount: true },
             }),
         ]);
 
         return {
             total,
-            totalAmount: totalAmount._sum.amount || 0,
+            totalAmount: totalAmount._sum.paidAmount || 0,
         };
     }
 }

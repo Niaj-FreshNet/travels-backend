@@ -36,13 +36,13 @@ export const ROLES = {
 // -------------------- ACCOUNT TYPES --------------------
 export const ACCOUNT_TYPES = {
   CREDIT: "Credit",
-  CASH: "Cash",
+  DEBIT: "Debit",
 };
 
 // -------------------- MODES --------------------
 export const MODES = {
   CASH: "Cash",
-  BANK: "Bank",
+  CREDIT: "Credit",
   CHEQUE: "Cheque",
   CARD: "Card",
   ONLINE: "Online",
@@ -50,7 +50,7 @@ export const MODES = {
 
 // -------------------- POST STATUS --------------------
 export const POST_STATUS = {
-  DRAFT: "Draft",
+  PENDING: "Pending",
   POSTED: "Posted",
 };
 
@@ -58,7 +58,7 @@ export const POST_STATUS = {
 export const PAYMENT_STATUS = {
   PENDING: "Pending",
   PAID: "Paid",
-  PARTIAL: "Partial",
+  DUE: "Due",
   CANCELLED: "Cancelled",
 };
 
@@ -72,12 +72,13 @@ export const SEARCH_FIELDS = [
   "airlineCode",
   "iataName",
   "sellBy",
+  "officeId",
 ];
 
 // -------------------- PAGINATION DEFAULTS --------------------
 export const PAGINATION = {
   DEFAULT_PAGE: 1,
-  DEFAULT_LIMIT: 25,
+  DEFAULT_LIMIT: 20,
   DEFAULT_SORT: "-date",
   MAX_LIMIT: 100,
 };

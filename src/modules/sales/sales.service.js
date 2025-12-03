@@ -16,33 +16,69 @@ class SalesServices {
         let where = {};
 
         // Permission-based filters
-        if (role === ROLES.SALES) where.createdBy = email;
-        else if (role === ROLES.ADMIN) where.officeId = officeId;
+        if (role === ROLES.SALES) {
+            where.createdBy = email;
+        } else if (role === ROLES.ADMIN) {
+            where.officeId = officeId;
+        }
 
-        // Query filters
-        if (query.postStatus) where.postStatus = query.postStatus;
-        if (query.paymentStatus) where.paymentStatus = query.paymentStatus;
-        if (query.accountType) where.accountType = query.accountType;
+        // Query filters from frontend
+        if (query.supplierName) {
+            where.supplierName = query.supplierName;
+        }
 
-        // Date filters
-        if (query.startDate || query.endDate) {
-            where.date = {};
-            if (query.startDate) where.date.gte = new Date(query.startDate);
-            if (query.endDate) where.date.lte = new Date(query.endDate);
+        if (query.postStatus) {
+            where.postStatus = query.postStatus;
+        }
+
+        if (query.paymentStatus) {
+            where.paymentStatus = query.paymentStatus;
+        }
+
+        if (query.accountType) {
+            where.accountType = query.accountType;
+        }
+
+        // Office filter (for super admin)
+        if (query.officeId) {
+            where.officeId = query.officeId;
+        }
+
+        // User filter (sellBy) - handle null values
+        if (query.sellBy) {
+            where.sellBy = query.sellBy;
+        }
+
+        // Date range filters - HANDLE AS STRINGS since your schema uses String type
+        if (query.startDate && query.endDate) {
+            // For string dates in YYYY-MM-DD format, we need to use gte and lte with string comparison
+            where.date = {
+                gte: query.startDate,
+                lte: query.endDate
+            };
+        } else if (query.startDate) {
+            where.date = {
+                gte: query.startDate
+            };
+        } else if (query.endDate) {
+            where.date = {
+                lte: query.endDate
+            };
         }
 
         return paginate(prisma.sale, where, {
-            page: query.page,
-            limit: query.limit || 25,
-            sort: query.sort || "-date",
+            page: parseInt(query.page) || 1,
+            limit: parseInt(query.limit) || 20,
+            sort: query.sort || "-createdAt",
             search: query.search,
             searchFields: [
+                "rvNumber",
                 "documentNumber",
                 "passengerName",
                 "supplierName",
-                "rvNumber",
-                "sector",
                 "airlineCode",
+                "iataName",
+                "sellBy",
             ],
         });
     }
@@ -211,7 +247,6 @@ class SalesServices {
             buyingPrice: Number(data.buyingPrice) || 0,
             createdBy: user.email,
             officeId: user.officeId,
-            createdAt: new Date(),
             postStatus: data.postStatus || POST_STATUS.DRAFT,
             paymentStatus: data.paymentStatus || PAYMENT_STATUS.PENDING,
         };

@@ -17,7 +17,7 @@ router.get("/", salesController.getSales);
 router.post("/", salesController.createSale);
 
 // GET /api/sales/validate-existing - Validate document number & get next RV number
-router.get("/validate-existing", salesController.validateExistingSale);
+router.get("/validate-existing-sales", salesController.validateExistingSale);
 
 // GET /api/sales/payment-status - Get sales by supplier and payment status
 router.get("/payment-status", salesController.getSalesBySupplierPaymentStatus);
