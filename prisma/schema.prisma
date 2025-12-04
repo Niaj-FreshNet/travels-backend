@@ -9,28 +9,33 @@ datasource db {
 
 // 1. Sales (4662 docs – MOST CRITICAL)
 model Sale {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  date           String
-  rvNumber       String?
-  airlineCode    String
-  documentNumber String
-  iataName       String?
-  supplierName   String
-  accountType    String
-  sellPrice      Float
-  buyingPrice    Float
-  mode           String
-  remarks        String   @default("")
-  passengerName  String   @default("")
-  sector         String   @default("")
-  sellBy         String?
-  postStatus     String   @default("Pending")
-  paymentStatus  String   @default("Due")
-  saveAndPost    String?
-  createdAt      DateTime @default(now())
-  createdBy      String
-  officeId       String
-  isRefunded     String?
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  date              String
+  rvNumber          String?
+  airlineCode       String
+  documentNumber    String
+  iataName          String?
+  supplierName      String
+  accountType       String
+  sellPrice         Float
+  buyingPrice       Float
+  mode              String
+  remarks           String   @default("")
+  passengerName     String   @default("")
+  sector            String   @default("")
+  sellBy            String?
+  postStatus        String   @default("Pending")
+  paymentStatus     String   @default("Due")
+  saveAndPost       String?
+  createdAt         DateTime @default(now())
+  createdBy         String
+  officeId          String
+  isRefunded        String?
+  refundAmount      Float?
+  refundCharge      String?
+  refundDate        String?
+  refundFromAirline Float?
+  serviceCharge     String?
 
   @@index([officeId])
   @@index([createdBy])
@@ -61,16 +66,16 @@ model Payment {
 
 // 3. Suppliers
 model Supplier {
-  id              String  @id @default(auto()) @map("_id") @db.ObjectId
-  supplierName    String
-  accountType     String
-  openingBalance  String  @default("00")
-  date            String
-  status          String  @default("Active")
-  totalDue        Float   @default(0)
-  sellBy          String?
-  createdBy       String
-  officeId        String
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  supplierName   String
+  accountType    String
+  openingBalance String  @default("00")
+  date           String
+  status         String  @default("Active")
+  totalDue       Float   @default(0)
+  sellBy         String?
+  createdBy      String
+  officeId       String
 
   @@index([officeId])
   @@index([createdBy])
@@ -80,21 +85,20 @@ model Supplier {
 
 // 4. Users
 model User {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  email     String @unique
-  position  String?
-  role      String
-  officeId  String
-  password  String
-  date      String
-  status    String @default("active")
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String  @unique
+  position String?
+  role     String
+  officeId String
+  password String
+  date     String
+  status   String  @default("active")
 
   @@index([officeId])
   @@index([role])
   @@map("users")
 }
-
 
 // 5. Airlines
 model Airline {
@@ -111,11 +115,11 @@ model Airline {
 
 // 6. Client Areas (Offices)
 model ClientArea {
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
   officeName    String
-  officeId      String @unique
+  officeId      String  @unique
   officeAddress String?
-  status        String @default("active")
+  status        String  @default("active")
 
   @@map("clientAreas")
 }
