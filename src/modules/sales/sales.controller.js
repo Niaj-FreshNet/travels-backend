@@ -23,6 +23,28 @@ class SalesController {
         }
     }
 
+    async getRefundSales(req, res) {
+        try {
+            const result = await salesServices.getRefundSales({
+                user: req.user,
+                query: req.query,
+            });
+
+            return res.status(200).json({
+                success: true,
+                data: result
+            });
+        } catch (error) {
+            console.error("Error in refund sales:", error);
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to get refund sales",
+                error: error.message
+            });
+        }
+    }
+
     // GET /api/sales/:id - Get single sale by ID
     async getSaleById(req, res) {
         try {

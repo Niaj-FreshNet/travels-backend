@@ -8,7 +8,7 @@ const router = express.Router();
 // All routes require authentication
 router.use(verifyToken);
 
-// ============ Main CRUD Operations ============
+// ============ STATIC ROUTES (PLACE FIRST) ============
 
 // GET /api/sales - Get all sales with pagination & filters
 router.get("/", salesController.getSales);
@@ -16,50 +16,40 @@ router.get("/", salesController.getSales);
 // POST /api/sales - Create a new sale
 router.post("/", salesController.createSale);
 
-// GET /api/sales/validate-existing - Validate document number & get next RV number
+// Validate existing
 router.get("/validate-existing-sales", salesController.validateExistingSale);
 
-// GET /api/sales/payment-status - Get sales by supplier and payment status
+// Payment status routes
 router.get("/payment-status", salesController.getSalesBySupplierPaymentStatus);
-
 router.get("/payment-status-count", salesController.getPaymentCounts);
 
+// Refund sales list
+router.get("/refunds", salesController.getRefundSales);
+
+// Profit summary
 router.get("/profit-summary", salesController.getProfitSummary);
 
-// Get total due for all users
+// Admin-only due total
 router.get("/total-due", verifyAdmin, salesController.getTotalDuePerUser);
 
-// GET /api/sales/:id - Get single sale by ID
-router.get("/:id", salesController.getSaleById);
+// ============ DYNAMIC ROUTES (ALWAYS LAST) ============
 
-// PUT /api/sales/:id - Update entire sale
-router.put("/:id", salesController.updateSale);
-
-// DELETE /api/sales/:id - Delete sale by ID
-router.delete("/:id", salesController.deleteSale);
-
-// ============ Status Update Operations ============
-
-// PATCH /api/sales/:id/postStatus - Update post status
+// Status update operations
 router.patch("/:id/postStatus", salesController.updatePostStatus);
-
-// PATCH /api/sales/:id/refundStatus - Update refund status
 router.patch("/:id/refundStatus", salesController.updateRefundStatus);
-
-// PATCH /api/sales/:id/paymentStatus - Update payment status
 router.patch("/:id/paymentStatus", salesController.updatePaymentStatus);
 
-// ============ Refund Operations ============
-
-// PATCH /api/sales/:id/isRefund - Mark sale as refunded
+// Refund operations
 router.patch("/:id/isRefund", salesController.markAsRefunded);
-
-// PATCH /api/sales/:id/notRefund - Mark sale as not refunded
 router.patch("/:id/notRefund", salesController.markAsNotRefunded);
 
-// ============ Partial Update ============
-
-// PATCH /api/sales/:id - Partial update of sale fields
+// Partial update
 router.patch("/:id", salesController.partialUpdateSale);
+
+// GET single sale
+router.get("/:id", salesController.getSaleById);
+
+// DELETE
+router.delete("/:id", salesController.deleteSale);
 
 export const salesRoutes = router;

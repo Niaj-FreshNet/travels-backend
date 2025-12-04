@@ -30,6 +30,7 @@ model Sale {
   createdAt      DateTime @default(now())
   createdBy      String
   officeId       String
+  isRefunded     String?
 
   @@index([officeId])
   @@index([createdBy])

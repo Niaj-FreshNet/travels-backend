@@ -83,6 +83,28 @@ class SalesServices {
         });
     }
 
+    async getRefundSales({ user, query }) {
+        const where = {
+            isRefunded: "Yes",
+        };
+
+        return paginate(prisma.sale, where, {
+            page: parseInt(query.page) || 1,
+            limit: parseInt(query.limit) || 20,
+            sort: query.sort || "-createdAt",
+            search: query.search,
+            searchFields: [
+                "rvNumber",
+                "documentNumber",
+                "passengerName",
+                "supplierName",
+                "airlineCode",
+                "iataName",
+                "sellBy",
+            ],
+        });
+    }
+
     // Get single sale by ID
     async getSaleById(id, user) {
         const { role, email, officeId } = user;

@@ -4,45 +4,35 @@ import { ROLES, PAYMENT_METHODS } from "./payment.constant.js";
 
 class PaymentServices {
     // Get all payments (Admin sees office payments, Super-Admin sees all)
-async getAllPayments({ user, query }) {
-    const { role, officeId } = user;
+    async getAllPayments({ user, query }) {
+        const { role, officeId } = user;
 
-    let where = {};
+        let where = {};
 
-    // Admin = only their office
-    if (role === ROLES.ADMIN) {
-        where.officeId = officeId;
+        // Admin = only their office
+        if (role === ROLES.ADMIN) {
+            where.officeId = officeId;
+        }
+
+        // Optional filters
+        if (query.supplierName) where.supplierName = query.supplierName;
+        if (query.method) where.method = query.method;
+
+        // Date range filter using JS Date objects
+        if (query.startDate || query.endDate) {
+            where.createdAt = {};
+            if (query.startDate) where.createdAt.gte = new Date(query.startDate);
+            if (query.endDate) where.createdAt.lte = new Date(query.endDate);
+        }
+
+        return paginate(prisma.payment, where, {
+            page: query.page ? parseInt(query.page) : 1,
+            limit: query.limit ? parseInt(query.limit) : 25,
+            sort: query.sort || "-createdAt",
+            search: query.search,
+            searchFields: ["method", "createdBy", "officeId"],
+        });
     }
-
-    // Optional method filter
-    if (query.method) {
-        where.method = query.method;
-    }
-
-    // Date range filter using paymentDate
-    if (query.startDate && query.endDate) {
-        where.paymentDate = {
-            gte: query.startDate,
-            lte: query.endDate
-        };
-    } else if (query.startDate) {
-        where.paymentDate = {
-            gte: query.startDate
-        };
-    } else if (query.endDate) {
-        where.paymentDate = {
-            lte: query.endDate
-        };
-    }
-
-    return paginate(prisma.payment, where, {
-        page: query.page,
-        limit: query.limit || 25,
-        sort: query.sort || "-createdAt",
-        search: query.search,
-        searchFields: ["method", "createdBy", "officeId"],
-    });
-}
 
     // Get single payment by ID
     async getPaymentById(id, user) {
@@ -159,10 +149,10 @@ async getAllPayments({ user, query }) {
             where.officeId = officeId;
         }
 
-        if (startDate || endDate) {
+        if (query.startDate || query.endDate) {
             where.paymentDate = {};
-            if (startDate) where.paymentDate.gte = startDate;
-            if (endDate) where.paymentDate.lte = endDate;
+            if (query.startDate) where.paymentDate.gte = new Date(query.startDate);
+            if (query.endDate) where.paymentDate.lte = new Date(query.endDate);
         }
 
         const [total, totalAmount] = await Promise.all([
