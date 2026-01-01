@@ -16,31 +16,20 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow server-to-server & tools like curl/postman
-      if (!origin) return callback(null, true);
+// CORS setup (before all routes)
+app.use(cors({
+  origin: function(origin, callback){
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization","X-Requested-With","Accept"]
+}));
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Accept",
-    ],
-  })
-);
-
-// 🔥 THIS IS MANDATORY FOR PREFLIGHT
-app.options(/.*/, cors());
+// Preflight responses (must respond 200)
+app.options(/.*/, (req,res)=> res.sendStatus(200));
 
 // Body Parser Middleware
 app.use(express.json({ limit: "10mb" }));
