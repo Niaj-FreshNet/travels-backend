@@ -40,8 +40,7 @@ app.use(
 );
 
 // 🔥 THIS IS MANDATORY FOR PREFLIGHT
-app.options("*", cors());
-
+app.options(/.*/, cors());
 
 // Body Parser Middleware
 app.use(express.json({ limit: "10mb" }));
