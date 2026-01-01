@@ -12,12 +12,36 @@ const app = express();
 app.use(helmet());
 
 // CORS Configuration
-const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS?.split(",") || "*",
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : [];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow server-to-server & tools like curl/postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+    ],
+  })
+);
+
+// 🔥 THIS IS MANDATORY FOR PREFLIGHT
+app.options("*", cors());
+
 
 // Body Parser Middleware
 app.use(express.json({ limit: "10mb" }));
