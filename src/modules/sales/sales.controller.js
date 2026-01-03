@@ -111,7 +111,8 @@ class SalesController {
 
     async getPaymentCounts(req, res) {
         try {
-            const result = await salesServices.getPaymentCounts();
+            const { officeId } = req.user; // 👈 from verifyAdmin
+            const result = await salesServices.getPaymentCounts(officeId);
             return res.status(200).json({ success: true, data: result });
         } catch (error) {
             console.error("Error fetching payment counts:", error);
@@ -121,8 +122,8 @@ class SalesController {
 
     async getProfitSummary(req, res) {
         try {
-            const result = await salesServices.calculateProfitSummary();
-
+            const { officeId } = req.user; // 👈 from verifyAdmin
+            const result = await salesServices.calculateProfitSummary(officeId);
             return res.status(200).json({
                 success: true,
                 data: result

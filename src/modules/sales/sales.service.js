@@ -161,51 +161,54 @@ class SalesServices {
         });
     }
 
-    async getPaymentCounts() {
-        const dueCount = await prisma.sale.count({
-            where: { paymentStatus: "Due" }
-        });
-
-        const paidCount = await prisma.sale.count({
-            where: { paymentStatus: "Paid" }
+    async getPaymentCounts(officeId) {
+        const result = await prisma.sale.groupBy({
+            by: ["paymentStatus"],
+            where: { officeId },
+            _count: {
+                _all: true,
+            },
         });
 
         return {
-            duePayments: dueCount,
-            paidPayments: paidCount
+            duePayments:
+                result.find(r => r.paymentStatus === "Due")?._count._all || 0,
+            paidPayments:
+                result.find(r => r.paymentStatus === "Paid")?._count._all || 0,
         };
     }
 
-    async calculateProfitSummary() {
-        // PAID sales = total profit margin
-        const paidSales = await prisma.sale.findMany({
+    async calculateProfitSummary(officeId) {
+        const sales = await prisma.sale.findMany({
             where: {
-                paymentStatus: "Paid"
+                officeId,
+                paymentStatus: {
+                    in: ["Paid", "Due"],
+                },
             },
-            select: { sellPrice: true, buyingPrice: true }
+            select: {
+                paymentStatus: true,
+                sellPrice: true,
+                buyingPrice: true,
+            },
         });
 
-        const totalProfit = paidSales.reduce(
-            (acc, sale) => acc + (sale.sellPrice - sale.buyingPrice),
-            0
-        );
+        let totalProfit = 0;
+        let profitOnAir = 0;
 
-        // DUE sales = profit on air
-        const dueSales = await prisma.sale.findMany({
-            where: {
-                paymentStatus: "Due"
-            },
-            select: { sellPrice: true, buyingPrice: true }
-        });
+        for (const sale of sales) {
+            const profit = sale.sellPrice - sale.buyingPrice;
 
-        const profitOnAir = dueSales.reduce(
-            (acc, sale) => acc + (sale.sellPrice - sale.buyingPrice),
-            0
-        );
+            if (sale.paymentStatus === "Paid") {
+                totalProfit += profit;
+            } else if (sale.paymentStatus === "Due") {
+                profitOnAir += profit;
+            }
+        }
 
         return {
             totalProfit,
-            profitOnAir
+            profitOnAir,
         };
     }
 

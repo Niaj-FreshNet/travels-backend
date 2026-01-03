@@ -21,13 +21,13 @@ router.get("/validate-existing-sales", salesController.validateExistingSale);
 
 // Payment status routes
 router.get("/payment-status", salesController.getSalesBySupplierPaymentStatus);
-router.get("/payment-status-count", salesController.getPaymentCounts);
+router.get("/payment-status-count", verifyAdmin, salesController.getPaymentCounts);
 
 // Refund sales list
 router.get("/refunds", salesController.getRefundSales);
 
 // Profit summary
-router.get("/profit-summary", salesController.getProfitSummary);
+router.get("/profit-summary", verifyAdmin, salesController.getProfitSummary);
 
 // Admin-only due total
 router.get("/total-due", verifyAdmin, salesController.getTotalDuePerUser);
